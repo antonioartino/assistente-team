@@ -4,6 +4,8 @@ export function useVoiceRecognition({ onResult, onError }) {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const recognitionRef = useRef(null)
+  const finalTranscriptRef = useRef('')
+  const interimTranscriptRef = useRef('')
 
   const startListening = useCallback(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -12,6 +14,9 @@ export function useVoiceRecognition({ onResult, onError }) {
       return
     }
 
+    finalTranscriptRef.current = ''
+    interimTranscriptRef.current = ''
+
     const recognition = new SpeechRecognition()
     recognition.lang = 'it-IT'
     recognition.continuous = false
@@ -19,7 +24,6 @@ export function useVoiceRecognition({ onResult, onError }) {
     recognition.maxAlternatives = 1
 
     recognition.onstart = () => setIsListening(true)
-    recognition.onend = () => setIsListening(false)
 
     recognition.onresult = (event) => {
       let interim = ''
@@ -29,8 +33,25 @@ export function useVoiceRecognition({ onResult, onError }) {
         if (event.results[i].isFinal) final += t
         else interim += t
       }
-      setTranscript(final || interim)
-      if (final) onResult?.(final.trim())
+      if (final) {
+        finalTranscriptRef.current += final
+        setTranscript(finalTranscriptRef.current)
+      } else {
+        interimTranscriptRef.current = interim
+        setTranscript(finalTranscriptRef.current + interim)
+      }
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+      // Safari spesso non emette risultati finali — usiamo l'interim come fallback
+      const text = finalTranscriptRef.current.trim() || interimTranscriptRef.current.trim()
+      if (text) {
+        onResult?.(text)
+        finalTranscriptRef.current = ''
+        interimTranscriptRef.current = ''
+        setTranscript('')
+      }
     }
 
     recognition.onerror = (event) => {
@@ -44,7 +65,6 @@ export function useVoiceRecognition({ onResult, onError }) {
 
   const stopListening = useCallback(() => {
     recognitionRef.current?.stop()
-    setIsListening(false)
   }, [])
 
   return { isListening, transcript, startListening, stopListening }
@@ -58,7 +78,6 @@ export function speak(text) {
   utterance.lang = 'it-IT'
   utterance.rate = 1.05
   utterance.pitch = 1
-  // Cerca voce italiana
   const voices = window.speechSynthesis.getVoices()
   const itVoice = voices.find(v => v.lang.startsWith('it'))
   if (itVoice) utterance.voice = itVoice
