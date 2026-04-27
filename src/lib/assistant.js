@@ -151,6 +151,16 @@ L'utente parlerà ora.`
 
 // Calcola la data/ora del promemoria
 export function calcReminderTime(dataStr, oraStr, minutiPrima) {
-  const dt = new Date(`${dataStr}T${oraStr || '09:00'}:00`)
-  return addMinutes(dt, -minutiPrima)
+  try {
+    // Normalizza ora: accetta "HH:mm" o "HH:mm:ss"
+    const ora = oraStr ? oraStr.slice(0, 5) : '09:00'
+    const dt = new Date(`${dataStr}T${ora}:00`)
+    if (isNaN(dt.getTime())) return null
+    const result = addMinutes(dt, -minutiPrima)
+    if (isNaN(result.getTime())) return null
+    return result
+  } catch (e) {
+    console.error('calcReminderTime error:', e)
+    return null
+  }
 }
