@@ -102,16 +102,13 @@ export default function AssistantPage({ user, profile, onSignOut }) {
         }
         case 'MODIFICA_APPUNTAMENTO': {
           const { id, ...updates } = dati
-          // Gestisci campo singolo o oggetto completo
-          const updateData = dati.campo ? { [dati.campo]: dati.nuovo_valore } : updates
-          await updateAppointment(user.id, id, updateData)
+          await updateAppointment(user.id, id, updates)
           await loadData()
           return '✅ Appuntamento aggiornato!'
         }
         case 'MODIFICA_TODO': {
           const { id, ...updates } = dati
-          const updateData = dati.campo ? { [dati.campo]: dati.nuovo_valore } : updates
-          await updateTodo(user.id, id, updateData)
+          await updateTodo(user.id, id, updates)
           await loadData()
           return '✅ To-do aggiornato!'
         }
