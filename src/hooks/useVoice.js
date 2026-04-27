@@ -70,16 +70,34 @@ export function useVoiceRecognition({ onResult, onError }) {
   return { isListening, transcript, startListening, stopListening }
 }
 
-// Text-to-speech per leggere le risposte
+// Text-to-speech per leggere le risposte — compatibile Safari
 export function speak(text) {
   if (!window.speechSynthesis) return
   window.speechSynthesis.cancel()
+
   const utterance = new SpeechSynthesisUtterance(text)
   utterance.lang = 'it-IT'
   utterance.rate = 1.05
   utterance.pitch = 1
-  const voices = window.speechSynthesis.getVoices()
-  const itVoice = voices.find(v => v.lang.startsWith('it'))
-  if (itVoice) utterance.voice = itVoice
-  window.speechSynthesis.speak(utterance)
+
+  const trySpeak = () => {
+    const voices = window.speechSynthesis.getVoices()
+    const itVoice = voices.find(v => v.lang.startsWith('it'))
+    if (itVoice) utterance.voice = itVoice
+    window.speechSynthesis.speak(utterance)
+  }
+
+  // Safari carica le voci in modo asincrono
+  if (window.speechSynthesis.getVoices().length > 0) {
+    trySpeak()
+  } else {
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.onvoiceschanged = null
+      trySpeak()
+    }
+    // Fallback: parla comunque dopo 300ms anche senza voce italiana
+    setTimeout(() => {
+      if (!utterance.voice) window.speechSynthesis.speak(utterance)
+    }, 300)
+  }
 }
