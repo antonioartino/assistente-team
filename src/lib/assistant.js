@@ -93,7 +93,7 @@ export class AssistantConversation {
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-5',
+        model: 'claude-opus-4-5-20251101',
         max_tokens: 1000,
         system: SYSTEM_PROMPT,
         messages
