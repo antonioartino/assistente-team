@@ -305,7 +305,7 @@ export default function AssistantPage({ user, profile, onSignOut }) {
                     </h3>
                     <span style={{
                       fontSize: '0.65rem', padding: '0.15rem 0.4rem', borderRadius: '4px',
-                      background: a?.visibilita === 'team' ? '#3b82f620' : '#ffffff10',
+                      background: t.visibilita === 'team' ? '#3b82f620' : '#ffffff10',
                       color: t.visibilita === 'team' ? '#60a5fa' : 'var(--muted)',
                       border: `1px solid ${t.visibilita === 'team' ? '#3b82f640' : 'var(--border)'}`,
                       fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap'
