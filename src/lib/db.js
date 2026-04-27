@@ -4,9 +4,11 @@ import { calcReminderTime } from './assistant.js'
 // ─── APPUNTAMENTI ────────────────────────────────────────────────────────────
 
 export async function createAppointment(userId, dati) {
-  const reminderAt = dati.promemoria_minuti
-    ? calcReminderTime(dati.data, dati.ora, dati.promemoria_minuti).toISOString()
-    : null
+  let reminderAt = null
+  if (dati.promemoria_minuti && dati.data) {
+    const rt = calcReminderTime(dati.data, dati.ora, dati.promemoria_minuti)
+    reminderAt = rt ? rt.toISOString() : null
+  }
 
   const { data, error } = await supabase
     .from('appuntamenti')
@@ -82,9 +84,11 @@ export async function getAppointments(userId) {
 // ─── TO-DO ───────────────────────────────────────────────────────────────────
 
 export async function createTodo(userId, dati) {
-  const reminderAt = dati.promemoria_minuti && dati.scadenza_data
-    ? calcReminderTime(dati.scadenza_data, dati.scadenza_ora, dati.promemoria_minuti).toISOString()
-    : null
+  let reminderAt = null
+  if (dati.promemoria_minuti && dati.scadenza_data) {
+    const rt = calcReminderTime(dati.scadenza_data, dati.scadenza_ora, dati.promemoria_minuti)
+    reminderAt = rt ? rt.toISOString() : null
+  }
 
   const { data, error } = await supabase
     .from('todos')
